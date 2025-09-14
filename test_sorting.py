@@ -24,10 +24,10 @@ Your sorting function must follow this exact signature:
 
 # ===== CONFIGURATION SECTION =====
 # Import the sorting function you want to test
-from sort.insertion_sort import insertion_sort
+from sort.merge_sort import merge_sort_wrapper
 
 # Select the sorting method to test (must match function name in imported module)
-SORTING_METHOD = insertion_sort
+SORTING_METHOD = merge_sort_wrapper
 
 # Test case configuration
 TEST_CASES = [
