@@ -17,7 +17,7 @@ def merge(A, p, q, r):
 
 
 def merge_sort(A, p, r):
-    if p == r:
+    if p >= r:
         return
     q = (p + r) // 2
     merge_sort(A, p, q)
@@ -29,3 +29,6 @@ def merge_sort_wrapper(A):
     if A:
         merge_sort(A, 0, len(A) - 1)
     return A
+
+
+merge_sort([], 0, 0)
