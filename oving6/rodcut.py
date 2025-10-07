@@ -381,4 +381,6 @@ def benchmark_comparison():
 
 # Kjør benchmark hvis du vil
 # Uncomment linjen under for å kjøre benchmarken:
-benchmark_comparison()
+# benchmark_comparison()
+
+print(rodcut_table(20, [1, 2, 3, 7, 5, 6, 7]))
