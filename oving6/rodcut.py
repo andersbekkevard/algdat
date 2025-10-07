@@ -23,9 +23,8 @@ def rodcut(n, prices):
     Returns:
         Maksimal totalpris som kan oppnås
     """
-    return rodcut_naive(n, prices)
-    # memo = dict()
-    # return rodcut_memo(n, prices, memo)
+
+    return rodcut_table(n, prices)
 
 
 def rodcut_naive(n, prices):
@@ -46,6 +45,15 @@ def rodcut_memo(n, prices, memo):
         [rodcut_memo(n - i, prices, memo) + prices[i - 1] for i in range(1, n + 1)]
     )
     return memo[n]
+
+
+def rodcut_table(n, prices):
+    # table = [[0 for _ in range(n)] for _ in range(n)]
+    table = [0 for _ in range(n + 1)]
+    for i in range(0, n + 1):
+        for j in range(1, min(len(prices), i) + 1):
+            table[i] = max(table[i], prices[j - 1] + table[i - j])
+    return table[n]
 
 
 # region tests
@@ -95,12 +103,12 @@ if large_tests:
         ),
         (12, [3, 5, 8, 9, 10, 17, 17, 20, 24, 30, 31, 32], 36),
         (8, [2, 5, 7, 8, 10, 15, 16, 18], 20),
-        (10, [2, 5, 7, 8, 10, 15, 16, 18, 20, 25], 27),
-        (7, [3, 7, 10, 13, 16, 20, 23], 23),
+        (10, [2, 5, 7, 8, 10, 15, 16, 18, 20, 25], 25),
+        (7, [3, 7, 10, 13, 16, 20, 23], 24),
         (5, [2, 4, 6, 8, 10], 10),
         (6, [3, 6, 9, 12, 15, 18], 18),
         (9, [4, 8, 12, 16, 20, 24, 28, 32, 36], 36),
-        (11, [1, 5, 8, 9, 10, 17, 17, 20, 24, 30, 31], 33),
+        (11, [1, 5, 8, 9, 10, 17, 17, 20, 24, 30, 31], 31),
     ]
 
 failed = False
@@ -128,198 +136,244 @@ if not failed:
 
 def benchmark_comparison():
     """
-    Sammenlign hastigheten mellom solve_naive, solve_memo og solve_table med ulike størrelser.
+    Sammenlign hastigheten mellom rodcut_naive, rodcut_memo og rodcut_table med ulike størrelser.
     """
     import time
     import random
 
-    print("\n" + "=" * 100)
-    print("HASTIGHETSBENCHMARK: rodcut_naive vs rodcut_memo vs rodcut_table")
-    print("=" * 100)
+    print("\n" + "=" * 110)
+    print("🔬 HASTIGHETSBENCHMARK: Rod Cutting Algoritmer".center(110))
+    print("=" * 110)
 
     # Generer test cases av ulike størrelser
-    test_sizes = [5, 8, 10, 12, 15, 18, 20, 22, 25, 30, 40, 50, 100]
+    test_sizes = [5, 8, 10, 12, 15, 18, 20, 22, 25, 30, 40, 50, 100, 200]
 
     results = []
     skip_naive = False  # Starter å hoppe over naive når den tar > 1 sekund
 
+    print("\n⏳ Kjører tester...\n")
+
     for n in test_sizes:
-        # Generer tilfeldige priser
-        random.seed(42 + n)  # For reproduserbarhet (unik seed per størrelse)
+        # Generer tilfeldige priser (samme for alle tre metoder)
+        random.seed(42 + n)  # For reproduserbarhet
         prices = [random.randint(1, n * 2) for _ in range(n)]
 
-        # Test rodcut_naive
-        if not skip_naive and n <= 20:  # Hopp over naive for store n
-            start_naive = time.perf_counter()
-            result_naive = rodcut_naive(n, prices)
-            time_naive = time.perf_counter() - start_naive
+        result_data = {"n": n}
 
-            # Hvis det tok mer enn 1 sekund, hopp over naive for større størrelser
-            if time_naive > 1.0:
-                skip_naive = True
+        # Test rodcut_naive (rekursiv)
+        if not skip_naive and n <= 22:
+            try:
+                start = time.perf_counter()
+                result_naive = rodcut_naive(n, prices)
+                time_naive = time.perf_counter() - start
+                result_data["time_naive"] = time_naive
+                result_data["result_naive"] = result_naive
+
+                # Skip naive hvis det tar mer enn 1 sekund
+                if time_naive > 1.0:
+                    skip_naive = True
+                    print(f"⏭️  Hopper over naive for n > {n} (tar for lang tid)")
+            except Exception as e:
+                result_data["time_naive"] = None
+                result_data["result_naive"] = None
+                print(f"❌ Naive feilet for n={n}: {e}")
         else:
-            time_naive = None
-            result_naive = None
+            result_data["time_naive"] = None
+            result_data["result_naive"] = None
 
-        # Test rodcut_memo (memoized)
-        start_memo = time.perf_counter()
-        result_memo = rodcut_memo(n, prices)
-        time_memo = time.perf_counter() - start_memo
+        # Test rodcut_memo (memoization)
+        try:
+            start = time.perf_counter()
+            result_memo = rodcut_memo(n, prices, {})
+            time_memo = time.perf_counter() - start
+            result_data["time_memo"] = time_memo
+            result_data["result_memo"] = result_memo
+        except Exception as e:
+            result_data["time_memo"] = None
+            result_data["result_memo"] = None
+            print(f"❌ Memo feilet for n={n}: {e}")
 
         # Test rodcut_table (tabulation)
-        start_table = time.perf_counter()
-        result_table = rodcut_table(n, prices)
-        time_table = time.perf_counter() - start_table
+        try:
+            start = time.perf_counter()
+            result_table = rodcut_table(n, prices)
+            time_table = time.perf_counter() - start
+            result_data["time_table"] = time_table
+            result_data["result_table"] = result_table
+        except Exception as e:
+            result_data["time_table"] = None
+            result_data["result_table"] = None
+            print(f"❌ Table feilet for n={n}: {e}")
 
-        # Verifiser at resultatene er like
-        if time_naive is not None and result_naive != result_memo:
-            print(f"⚠️  ADVARSEL: Ulike resultater mellom naive og memo for n={n}!")
-        if result_memo != result_table:
-            print(f"⚠️  ADVARSEL: Ulike resultater mellom memo og table for n={n}!")
+        # Verifiser at alle gir samme resultat
+        all_results = [
+            r
+            for r in [
+                result_data.get("result_naive"),
+                result_data.get("result_memo"),
+                result_data.get("result_table"),
+            ]
+            if r is not None
+        ]
 
-        results.append(
-            {
-                "n": n,
-                "time_naive": time_naive,
-                "time_memo": time_memo,
-                "time_table": time_table,
-                "speedup_memo": time_naive / time_memo if time_naive else None,
-                "speedup_table": time_naive / time_table if time_naive else None,
-                "memo_vs_table": time_memo / time_table if time_table > 0 else None,
-            }
-        )
+        if len(set(all_results)) > 1:
+            print(f"⚠️  ADVARSEL: Ulike resultater for n={n}!")
+            if result_data.get("result_naive") is not None:
+                print(f"   Naive: {result_data['result_naive']}")
+            if result_data.get("result_memo") is not None:
+                print(f"   Memo:  {result_data['result_memo']}")
+            if result_data.get("result_table") is not None:
+                print(f"   Table: {result_data['result_table']}")
 
-    # Print resultatene i en pen tabell
-    print("\n┌" + "─" * 98 + "┐")
-    print("│" + " " * 42 + "RESULTATER" + " " * 46 + "│")
+        results.append(result_data)
+
+    # Print resultater i en pen tabell
+    print("\n" + "=" * 110)
+    print("📊 RESULTATER".center(110))
+    print("=" * 110)
+
+    # Tabell header
     print(
-        "├"
-        + "─" * 6
-        + "┬"
-        + "─" * 14
-        + "┬"
-        + "─" * 14
-        + "┬"
-        + "─" * 14
-        + "┬"
-        + "─" * 12
-        + "┬"
-        + "─" * 12
-        + "┬"
-        + "─" * 12
-        + "┤"
+        "\n┌────────┬─────────────────┬─────────────────┬─────────────────┬──────────────┬──────────────┬──────────────┐"
     )
     print(
-        f"│ {'n':^4} │ {'Naive (s)':^12} │ {'Memo (s)':^12} │ {'Table (s)':^12} │ {'N→M':^10} │ {'N→T':^10} │ {'M/T':^10} │"
+        "│   n    │   Naive (s)     │   Memo (s)      │   Table (s)     │  Naive/Memo  │ Naive/Table  │  Memo/Table  │"
     )
     print(
-        "├"
-        + "─" * 6
-        + "┼"
-        + "─" * 14
-        + "┼"
-        + "─" * 14
-        + "┼"
-        + "─" * 14
-        + "┼"
-        + "─" * 12
-        + "┼"
-        + "─" * 12
-        + "┼"
-        + "─" * 12
-        + "┤"
+        "├────────┼─────────────────┼─────────────────┼─────────────────┼──────────────┼──────────────┼──────────────┤"
     )
 
+    # Datarows
     for r in results:
-        n_str = f"{r['n']}"
+        n = r["n"]
 
+        # Formater naive tid
         if r["time_naive"] is not None:
-            naive_str = f"{r['time_naive']:.6f}"
-            speedup_memo_str = f"{r['speedup_memo']:.2f}x"
-            speedup_table_str = f"{r['speedup_table']:.2f}x"
+            naive_str = f"{r['time_naive']:>13.6f}s"
         else:
-            naive_str = "TOO SLOW"
-            speedup_memo_str = "N/A"
-            speedup_table_str = "N/A"
+            naive_str = "       -       "
 
-        memo_str = f"{r['time_memo']:.6f}"
-        table_str = f"{r['time_table']:.6f}"
-        memo_vs_table_str = (
-            f"{r['memo_vs_table']:.2f}x" if r["memo_vs_table"] else "N/A"
-        )
+        # Formater memo tid
+        if r["time_memo"] is not None:
+            memo_str = f"{r['time_memo']:>13.6f}s"
+        else:
+            memo_str = "       -       "
+
+        # Formater table tid
+        if r["time_table"] is not None:
+            table_str = f"{r['time_table']:>13.6f}s"
+        else:
+            table_str = "       -       "
+
+        # Beregn speedups
+        if r["time_naive"] and r["time_memo"]:
+            speedup_memo = r["time_naive"] / r["time_memo"]
+            speedup_memo_str = f"{speedup_memo:>11.1f}x"
+        else:
+            speedup_memo_str = "      -      "
+
+        if r["time_naive"] and r["time_table"]:
+            speedup_table = r["time_naive"] / r["time_table"]
+            speedup_table_str = f"{speedup_table:>11.1f}x"
+        else:
+            speedup_table_str = "      -      "
+
+        if r["time_memo"] and r["time_table"]:
+            ratio = r["time_memo"] / r["time_table"]
+            ratio_str = f"{ratio:>11.2f}x"
+        else:
+            ratio_str = "      -      "
 
         print(
-            f"│ {n_str:>4} │ {naive_str:>12} │ {memo_str:>12} │ {table_str:>12} │ {speedup_memo_str:>10} │ {speedup_table_str:>10} │ {memo_vs_table_str:>10} │"
+            f"│ {n:>6} │ {naive_str} │ {memo_str} │ {table_str} │ {speedup_memo_str} │ {speedup_table_str} │ {ratio_str} │"
         )
 
     print(
-        "└"
-        + "─" * 6
-        + "┴"
-        + "─" * 14
-        + "┴"
-        + "─" * 14
-        + "┴"
-        + "─" * 14
-        + "┴"
-        + "─" * 12
-        + "┴"
-        + "─" * 12
-        + "┴"
-        + "─" * 12
-        + "┘"
+        "└────────┴─────────────────┴─────────────────┴─────────────────┴──────────────┴──────────────┴──────────────┘"
     )
 
-    # Print forklaring
-    print("\n📝 N→M: Speedup fra Naive til Memoization")
-    print("📝 N→T: Speedup fra Naive til Tabulation")
-    print("📝 M/T: Ratio Memoization/Tabulation (>1 betyr Tabulation er raskere)")
+    # Forklaring
+    print("\n📝 Forklaring:")
+    print("   • Naive/Memo: Hvor mye raskere er memoization enn naive rekursjon")
+    print("   • Naive/Table: Hvor mye raskere er tabulation enn naive rekursjon")
+    print(
+        "   • Memo/Table: Ratio mellom memo og table (>1 = table er raskere, <1 = memo er raskere)"
+    )
 
-    # Print oppsummering
-    print("\n" + "=" * 100)
-    print("OPPSUMMERING:")
-    print("=" * 100)
+    # Statistikk og oppsummering
+    print("\n" + "=" * 110)
+    print("📈 OPPSUMMERING OG STATISTIKK".center(110))
+    print("=" * 110 + "\n")
 
-    valid_memo_speedups = [
-        r["speedup_memo"] for r in results if r["speedup_memo"] is not None
+    # Beregn statistikk
+    memo_speedups = [
+        r["time_naive"] / r["time_memo"]
+        for r in results
+        if r.get("time_naive") and r.get("time_memo")
     ]
-    valid_table_speedups = [
-        r["speedup_table"] for r in results if r["speedup_table"] is not None
+    table_speedups = [
+        r["time_naive"] / r["time_table"]
+        for r in results
+        if r.get("time_naive") and r.get("time_table")
     ]
-    valid_memo_vs_table = [
-        r["memo_vs_table"] for r in results if r["memo_vs_table"] is not None
+    memo_vs_table = [
+        r["time_memo"] / r["time_table"]
+        for r in results
+        if r.get("time_memo") and r.get("time_table")
     ]
 
-    if valid_memo_speedups:
-        avg_memo_speedup = sum(valid_memo_speedups) / len(valid_memo_speedups)
-        max_memo_speedup = max(valid_memo_speedups)
+    if memo_speedups:
+        print("🔹 MEMOIZATION vs NAIVE:")
         print(
-            f"📊 Memoization - Gjennomsnittlig speedup vs Naive: {avg_memo_speedup:.2f}x"
+            f"   • Gjennomsnittlig speedup: {sum(memo_speedups)/len(memo_speedups):.1f}x"
         )
-        print(f"🚀 Memoization - Maksimal speedup vs Naive: {max_memo_speedup:.2f}x")
+        print(f"   • Minimum speedup: {min(memo_speedups):.1f}x")
+        print(f"   • Maksimum speedup: {max(memo_speedups):.1f}x")
+        print()
 
-    if valid_table_speedups:
-        avg_table_speedup = sum(valid_table_speedups) / len(valid_table_speedups)
-        max_table_speedup = max(valid_table_speedups)
+    if table_speedups:
+        print("🔹 TABULATION vs NAIVE:")
         print(
-            f"📊 Tabulation - Gjennomsnittlig speedup vs Naive: {avg_table_speedup:.2f}x"
+            f"   • Gjennomsnittlig speedup: {sum(table_speedups)/len(table_speedups):.1f}x"
         )
-        print(f"🚀 Tabulation - Maksimal speedup vs Naive: {max_table_speedup:.2f}x")
+        print(f"   • Minimum speedup: {min(table_speedups):.1f}x")
+        print(f"   • Maksimum speedup: {max(table_speedups):.1f}x")
+        print()
 
-    if valid_memo_vs_table:
-        avg_ratio = sum(valid_memo_vs_table) / len(valid_memo_vs_table)
-        if avg_ratio > 1:
+    if memo_vs_table:
+        avg_ratio = sum(memo_vs_table) / len(memo_vs_table)
+        print("🔹 MEMOIZATION vs TABULATION:")
+        print(f"   • Gjennomsnittlig ratio: {avg_ratio:.2f}x")
+
+        if avg_ratio > 1.1:
             print(
-                f"\n⚡ Tabulation er i gjennomsnitt {avg_ratio:.2f}x raskere enn Memoization"
+                f"   • 🏆 Tabulation er i gjennomsnitt {avg_ratio:.1f}x raskere enn memoization"
             )
-        elif avg_ratio < 1:
+        elif avg_ratio < 0.9:
             print(
-                f"\n⚡ Memoization er i gjennomsnitt {1/avg_ratio:.2f}x raskere enn Tabulation"
+                f"   • 🏆 Memoization er i gjennomsnitt {1/avg_ratio:.1f}x raskere enn tabulation"
             )
         else:
-            print(f"\n⚖️  Memoization og Tabulation har omtrent samme hastighet")
+            print("   • ⚖️  Omtrent lik hastighet")
+        print()
 
-    print("=" * 100 + "\n")
+    # Konklusjon
+    print("💡 KONKLUSJON:")
+    if table_speedups:
+        best_speedup = max(table_speedups) if table_speedups else 0
+        print(
+            f"   Dynamic programming (memo/table) gir opptil {best_speedup:.0f}x speedup vs naive rekursjon!"
+        )
+
+    if avg_ratio and len(memo_vs_table) > 5:
+        if avg_ratio > 1.1:
+            print(f"   For dette problemet er tabulation den raskeste tilnærmingen.")
+        elif avg_ratio < 0.9:
+            print(f"   For dette problemet er memoization den raskeste tilnærmingen.")
+        else:
+            print(f"   Memo og table har sammenlignbar ytelse for dette problemet.")
+
+    print("\n" + "=" * 110 + "\n")
 
 
 # endregion
@@ -327,4 +381,4 @@ def benchmark_comparison():
 
 # Kjør benchmark hvis du vil
 # Uncomment linjen under for å kjøre benchmarken:
-# benchmark_comparison()
+benchmark_comparison()
