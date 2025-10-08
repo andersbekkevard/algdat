@@ -47,6 +47,7 @@ def solve_memo(table, weights, values, n, W):
             solve_memo(table, weights, values, n - 1, W - weights[n - 1])
             + values[n - 1]
         )
+
         result = max(exclude, include)
     table[(n, W)] = result
     return result

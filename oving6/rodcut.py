@@ -383,4 +383,33 @@ def benchmark_comparison():
 # Uncomment linjen under for å kjøre benchmarken:
 # benchmark_comparison()
 
-print(rodcut_table(20, [1, 2, 3, 7, 5, 6, 7]))
+# print(rodcut_table(20, [1, 2, 3, 7, 5, 6, 7]))
+
+
+def rodcut_table_cost(n, p, k):
+    table = [0 for _ in range(n + 1)]
+    for i in range(0, n + 1):
+        for j in range(1, min(len(p), i) + 1):
+            table[i] = max(table[i], p[j - 1] + table[i - j] - k)
+    return table[n]
+
+
+def rodcut_memo_cost(n, p, k, memo):
+    if n == 0:
+        return 0
+    elif n in memo.keys():
+        return memo[n]
+    best = float("-inf")
+    for i in range(1, min(len(p), n) + 1):
+        value = max(rodcut_memo_cost(n - i, p, k, memo) - k, 0) + p[i - 1]
+        if value > best:
+            best = value
+    memo[n] = best
+    return memo[n]
+
+
+k = 2
+n = 7
+p = [1, 4, 3, 6, 8, 5, 9]
+
+print(rodcut_memo_cost(n, p, k, {}))
