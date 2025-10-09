@@ -75,6 +75,15 @@ docs/_build/
 .pybuilder/
 target/
 
+# Rust
+# Compiled files
+**/target/
+**/*.rs.bk
+*.pdb
+
+# Note: Cargo.lock is committed for binary projects (like seam_carving_rs)
+# but should be ignored for library projects
+
 # Jupyter Notebook
 .ipynb_checkpoints
 
@@ -213,3 +222,7 @@ test-results/
 .coverage
 coverage.xml
 *.cover
+
+# Generated output files
+**/seam_carved_*.jpg
+**/seam_carved_*.png
