@@ -1,1 +1,3 @@
 - [ ] Largest Cuboid (Øving 3)
+- [ ] Cut sheet (Øving 6)
+- [ ] Huffman (Øving 7)

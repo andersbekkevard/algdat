@@ -32,26 +32,26 @@ def longest_decreasing_subsequence(s):
     n = len(s)
     if n == 1:
         return s
-    table = [0] * n
-    previous_ptr = [-1] * n
+    dp = [0] * n
+    prev = [-1] * n
     for i in range(0, n):
         best = 1
         for j in range(i - 1, -1, -1):
             if s[j] > s[i]:
-                if table[j] + 1 > best:
-                    best = table[j] + 1
-                    previous_ptr[i] = j
-        table[i] = best
+                if dp[j] + 1 > best:
+                    best = dp[j] + 1
+                    prev[i] = j
+        dp[i] = best
 
     # Build sequence:
-    best_endpoint = max(range(n), key=table.__getitem__)
-    ptr = best_endpoint
-    subsequence = [s[ptr]]
-    while previous_ptr[ptr] != -1:
-        ptr = previous_ptr[ptr]
-        subsequence.append(s[ptr])
-    subsequence.reverse()
-    return subsequence
+    end_idx = max(range(n), key=dp.__getitem__)
+    idx = end_idx
+    seq = [s[idx]]
+    while prev[idx] != -1:
+        idx = prev[idx]
+        seq.append(s[idx])
+    seq.reverse()
+    return seq
 
 
 # Hardkodete tester
