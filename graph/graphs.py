@@ -34,6 +34,9 @@ class Graph:
             representation += f"{vertex}\n"
         return representation
 
+    def __repr__(self) -> str:
+        return self.__str__()
+
 
 class Node:
     def __init__(self, value):
@@ -55,6 +58,9 @@ class Node:
         return (
             f"Node(value={self.value}, color={self.color}, neighbors={neighbor_values})"
         )
+
+    def __repr__(self) -> str:
+        return self.__str__()
 
 
 # endregion
@@ -110,6 +116,42 @@ def get_test_graph():
     return g
 
 
+def get_small_test_graph():
+    """
+    Properties:
+    - Small connected graph (4 vertices, 3 edges)
+    - Contains one cycle (A-B-C-A)
+    - Simple structure for basic testing
+    - Not bipartite (contains odd-length cycle)
+
+    Visual representation:
+        A - B
+        |   |
+        D - C
+
+    Returns:
+        Graph: A Graph object with 4 vertices and 4 edges
+    """
+    g = Graph()
+
+    vertices = {}
+    for name in ["A", "B", "C", "D"]:
+        vertices[name] = Node(name)
+        g.add_vertex(vertices[name])
+
+    edges = [
+        ("A", "B"),
+        ("B", "C"),
+        ("C", "D"),
+        ("D", "A"),
+    ]
+
+    for v1, v2 in edges:
+        g.add_edge(vertices[v1], vertices[v2])
+
+    return g
+
+
 # endregion
 
 
@@ -136,18 +178,33 @@ def bfs(G: Graph, start: Node):
         u.color = Color.BLACK
 
 
+def dfs_visit(G: Graph, u: Node):
+    global time
+    time += 1
+    u.d = time
+    u.color = Color.GRAY
+    print(u)
+    for v in u.get_neighbors():
+        if v.color == Color.WHITE:
+            v.pred = u
+            dfs_visit(G, v)
+    time += 1
+    u.f = time
+    u.color = Color.BLACK
+
+
 def dfs(G: Graph):
     for u in G.vertices:
         u.color = Color.WHITE
         u.pred = None
+    global time
     time = 0
-    
+
     for u in G.vertices:
         if u.color == Color.WHITE:
-            
-
+            dfs_visit(G, u)
 
 
 if __name__ == "__main__":
     test_graph = get_test_graph()
-    bfs(test_graph, test_graph.vertices[0])
+    dfs(test_graph)
