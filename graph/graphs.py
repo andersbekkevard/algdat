@@ -1,56 +1,153 @@
+from enum import Enum
+from math import inf
+from typing import Optional
+from queue import Queue
+
+
+INF = 10**18
+
+
+# region definitions
+class Color(Enum):
+    WHITE = 1
+    GRAY = 2
+    BLACK = 3
+
+    def __str__(self) -> str:
+        return self.name.capitalize()
+
+
 class Graph:
-    def __init__(self, size):
-        self.size = size
-        self.adjacency_matrix = [[0 for _ in range(size)] for _ in range(size)]
+    def __init__(self):
+        self.vertices: list[Node] = []
+
+    def add_vertex(self, vertex):
+        self.vertices.append(vertex)
 
     def add_edge(self, vertex1, vertex2):
-        self.adjacency_matrix[vertex1][vertex2] = 1
-        self.adjacency_matrix[vertex2][vertex1] = 1
+        vertex1.add_neighbor(vertex2)
+        vertex2.add_neighbor(vertex1)
 
-    def remove_edge(self, vertex1, vertex2):
-        self.adjacency_matrix[vertex1][vertex2] = 0
-        self.adjacency_matrix[vertex2][vertex1] = 0
+    def __str__(self) -> str:
+        representation = "=" * 20 + " Graph " + "=" * 20 + "\n"
+        for vertex in self.vertices:
+            representation += f"{vertex}\n"
+        return representation
 
-    def get_neighbors(self, vertex):
-        return [i for i in range(self.size) if self.adjacency_matrix[vertex][i] == 1]
 
-    def get_size(self):
-        return self.size
+class Node:
+    def __init__(self, value):
+        self.value = value
+        self.color = Color.WHITE
+        self.neighbors: list[Node] = []
+        self.d = 0
+        self.pred: Optional[Node] = None
+        self.f = 0
 
-    def get_adjacency_matrix(self):
-        return self.adjacency_matrix
+    def add_neighbor(self, neighbor):
+        self.neighbors.append(neighbor)
 
-    def __str__(self):
-        result = [f"Graph with {self.size} vertices"]
-        result.append("")
+    def get_neighbors(self):
+        return self.neighbors
 
-        # List all vertices
-        result.append("Vertices:")
-        result.append("  " + ", ".join(str(i) for i in range(self.size)))
-        result.append("")
+    def __str__(self) -> str:
+        neighbor_values = [neighbor.value for neighbor in self.neighbors]
+        return (
+            f"Node(value={self.value}, color={self.color}, neighbors={neighbor_values})"
+        )
 
-        # List all edges (avoiding duplicates since it's an undirected graph)
-        edges = []
-        for i in range(self.size):
-            for j in range(i + 1, self.size):
-                if self.adjacency_matrix[i][j] == 1:
-                    edges.append(f"{i} -- {j}")
 
-        result.append("Edges:")
-        if edges:
-            for edge in edges:
-                result.append(f"  {edge}")
-        else:
-            result.append("  (no edges)")
+# endregion
 
-        return "\n".join(result)
+
+# region test graph
+def get_test_graph():
+    """
+    Properties:
+    - Connected graph (all vertices reachable)
+    - Contains cycles (A-B-F-E-A, C-G-H-D-C, etc.)
+    - Not bipartite (contains odd-length cycles)
+    - Multiple paths between vertices
+    - Mixed vertex degrees (1-4 neighbors)
+
+    Visual representation:
+        A - B - C - D
+        |   |   |
+        E - F - G - H
+        |       |
+        I - J - K
+
+    Returns:
+        Graph: A Graph object with 11 vertices and 13 edges
+    """
+    g = Graph()
+
+    vertices = {}
+    for i, name in enumerate(["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K"]):
+        vertices[name] = Node(name)
+        g.add_vertex(vertices[name])
+
+    edges = [
+        ("A", "B"),
+        ("A", "E"),
+        ("B", "C"),
+        ("B", "F"),
+        ("C", "D"),
+        ("C", "G"),
+        ("D", "H"),
+        ("E", "F"),
+        ("E", "I"),
+        ("F", "G"),
+        ("G", "H"),
+        ("G", "K"),
+        ("I", "J"),
+        ("J", "K"),
+    ]
+
+    for v1, v2 in edges:
+        g.add_edge(vertices[v1], vertices[v2])
+
+    return g
+
+
+# endregion
+
+
+def bfs(G: Graph, start: Node):
+    for u in G.vertices:
+        u.color = Color.WHITE
+        u.d = INF
+        u.pred = None
+    start.d = 0
+    start.color = Color.GRAY
+
+    Q: Queue[Node] = Queue()
+    Q.put(start)
+    while not Q.empty():
+        u = Q.get()
+        u.color = Color.GRAY
+        print(u)
+        for v in u.get_neighbors():
+            if v.color == Color.WHITE:
+                v.color = Color.GRAY
+                v.d = u.d + 1
+                v.pred = u
+                Q.put(v)
+        u.color = Color.BLACK
+
+
+def dfs(G: Graph):
+    for u in G.vertices:
+        u.color = Color.WHITE
+        u.pred = None
+    time = 0
+    
+    for u in G.vertices:
+        if u.color == Color.WHITE:
+            
+
 
 
 if __name__ == "__main__":
-    g = Graph(5)
-    g.add_edge(0, 1)
-    g.add_edge(0, 2)
-    g.add_edge(1, 2)
-    g.add_edge(1, 3)
-    g.add_edge(2, 3)
-    print(g)
+    test_graph = get_test_graph()
+    bfs(test_graph, test_graph.vertices[0])
