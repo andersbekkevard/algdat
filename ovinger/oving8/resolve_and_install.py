@@ -2,7 +2,22 @@
 # coding=utf-8
 import random
 import string
+from typing import Callable, List, Set, Tuple
 
+"""
+Har du noen gang trengt å installere pakker ved hjelp av et pakkesystem? En «pakke» er her programvare som installeres på datamaskinen. Python har for eksempel pakkesystemet pip som sin standard. Populære språkuavhengige pakkesystemer er APT, Homebrew, Pacman og Chocolatey.
+
+En ting som gjør prosessen komplisert, er at en pakke kan avhenge av at andre pakker er installert for at den selv kan installeres. Disse andre pakkene kan igjen avhenge av at andre pakker er installert. På den måten kan man risikere å måtte installere veldig mange pakker. Heldigvis har vi ikke sykliske avhengigheter, siden det da ville ha vært umulig å installere pakken.
+
+Her skal du implementere et forenklet pakkesystem. Du må implementere funksjonen resolve_and_install(package), som er en funksjon som kalles når en bruker ønsker å installere en pakke. Her er package et Package-objekt som representerer en pakke klienten ønsker å installere. Et Package-objekt har attributtene dependencies, som er et tuppel med Package-objekter pakken avhenger av, og is_installed, som er en boolsk variabel som sier om pakken allerede er installert. Flere av pakkene kan allerede være installert før resolve_and_install kalles. Du kan anta at om en pakke er installert, så er alle pakkene den avhenger av også installert.
+
+Funksjonen resolve_and_install(package) skal sørge for å installere pakken brukeren ønsker å installere. For å gjøre det, skal du bruke funksjonen install, som er implementert av oss. Når du kaller install(package) vil metoden prøve å installere pakken package på maskinen. Du må sørge for at følgende krav er overholdt når koden din kaller install(package):
+
+package kan ikke allerede være installert.
+Alle pakkene som package er avhengig av må være installerte.
+Ønsker du å teste programmet ditt lokalt, finnes det eksempeltester her.
+
+"""
 # Testsettet på serveren er større og mer omfattende enn dette.
 # Hvis programmet ditt fungerer lokalt, men ikke når du laster det opp,
 # er det gode sjanser for at det er tilfeller du ikke har tatt høyde for.
@@ -12,38 +27,37 @@ import string
 # instansene kontrolleres ved å justere på verdiene under.
 
 # Kontrollerer om det genereres tilfeldige instanser.
-generate_random_tests = False
+generate_random_tests: bool = False
 # Antall tilfeldige tester som genereres.
-random_tests = 10
+random_tests: int = 10
 # Laveste mulige antall pakker i generert instans.
-n_lower = 3
+n_lower: int = 3
 # Høyest mulig antall pakker i generert instans.
-n_upper = 10
+n_upper: int = 10
 # Om denne verdien er 0 vil det genereres nye instanser hver gang.
 # Om den er satt til et annet tall vil de samme instansene genereres
 # hver gang, om verdiene over ikke endres.
-seed = 0
-
-
-def resolve_and_install(package):
-    # Skriv din kode her
-    pass
+seed: int = 0
 
 
 class Package:
-    def __init__(self, dependencies, is_installed_func):
-        self.__is_installed_func = is_installed_func
-        self.__dependencies = dependencies
+    def __init__(
+        self,
+        dependencies: Tuple["Package", ...],
+        is_installed_func: Callable[["Package"], bool],
+    ):
+        self.__is_installed_func: Callable[["Package"], bool] = is_installed_func
+        self.__dependencies: Tuple["Package", ...] = dependencies
 
     @property
-    def dependencies(self):
+    def dependencies(self) -> Tuple["Package", ...]:
         return self.__dependencies
 
     @property
-    def is_installed(self):
+    def is_installed(self) -> bool:
         return self.__is_installed_func(self)
 
-    def __str__(self):
+    def __str__(self) -> str:
         if not self.dependencies:
             return f"● is_installed: {self.is_installed}\n"
         representation = f"┓ is_installed: {self.is_installed}\n"
@@ -58,21 +72,21 @@ class Package:
                 representation += f"┗━━━" + str(dependency).replace("\n", "\n    ")
         return representation
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return str(self)
 
-    def deepcopy(self):
-        def gen_function(val):
+    def deepcopy(self) -> "Package":
+        def gen_function(val: bool) -> Callable[["Package"], bool]:
             return lambda x: val
 
         return Package(
-            [dep.deepcopy() for dep in self.dependencies],
+            tuple(dep.deepcopy() for dep in self.dependencies),
             gen_function(self.is_installed),
         )
 
 
-def get_install_func(installed_packages):
-    def install(package):
+def get_install_func(installed_packages: Set[Package]) -> Callable[[Package], None]:
+    def install(package: Package) -> None:
         if package.is_installed:
             raise ValueError(
                 'Du kjører "install" på en pakke som allerede er installert.'
@@ -86,10 +100,27 @@ def get_install_func(installed_packages):
     return install
 
 
-def generate_random_test(num_nodes, p):
+"""
+The solution to this problem is the following:
+Perform a DFS. Color is not necessary, as we assume no cycles.
+Install at the bottom of the DFS: Thus, only packages with no uninstalled dependencies will be installed
+"""
+
+
+def resolve_and_install(package: Package) -> None:
+    for dep in package.dependencies:
+        if not dep.is_installed:
+            resolve_and_install(dep)
+    if not package.is_installed:
+        install(package)
+
+
+def generate_random_test(
+    num_nodes: int, p: float
+) -> Tuple[Package, Callable[[Package], None]]:
     installed_packages = set()
     is_installed_func = lambda x: x in installed_packages
-    packages = [None for i in range(num_nodes)]
+    packages: List[Package] = [None for i in range(num_nodes)]  # type: ignore
     incoming_edges = [[] for i in range(num_nodes)]
     installed_limit = random.randint(0, num_nodes)
     for i in range(1, num_nodes):
@@ -106,7 +137,7 @@ def generate_random_test(num_nodes, p):
     return (packages[0], get_install_func(installed_packages))
 
 
-def gen_examples(nl, nu, k):
+def gen_examples(nl: int, nu: int, k: int):
     for _ in range(k):
         yield generate_random_test(random.randint(nl, nu), random.randint(1, 9) / 10)
 

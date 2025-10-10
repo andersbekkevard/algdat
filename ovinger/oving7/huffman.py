@@ -1,5 +1,8 @@
 #!/usr/bin/python3
 # coding=utf-8
+from pathlib import Path
+
+current_dir = Path(__file__).parent
 
 # Testsettet på serveren er større og mer omfattende enn dette.
 # Hvis programmet ditt fungerer lokalt, men ikke når du laster det opp,
@@ -84,7 +87,7 @@ Riktig svar: {answer}
         )
 
 if use_extra_tests:
-    with open("tests_encode.txt") as extra_tests_data:
+    with open(current_dir / "tests_encode.txt") as extra_tests_data:
         extra_tests = []
         for line in extra_tests_data:
             data, encoding, answer = line.strip().split(" | ")

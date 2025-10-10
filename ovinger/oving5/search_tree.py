@@ -1,6 +1,9 @@
 # !/usr/bin/python3
 # coding=utf-8
 import random
+from pathlib import Path
+
+current_dir = Path(__file__).parent
 
 # Testsettet på serveren er større og mer omfattende enn dette.
 # Hvis programmet ditt fungerer lokalt, men ikke når du laster det opp,
@@ -169,7 +172,7 @@ Riktig svar: {answer}
         )
 
 if use_extra_tests:
-    with open("oving5/tests_search_tree.txt") as extra_tests_data:
+    with open(current_dir / "tests_search_tree.txt") as extra_tests_data:
         extra_tests = []
         for line in extra_tests_data:
             tree, dna, answer = line.strip().split(" | ")

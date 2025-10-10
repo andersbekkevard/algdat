@@ -3,9 +3,6 @@ import numpy as np
 from numba import njit
 from pathlib import Path
 
-# Endre disse variablene for å bytte bilde og hvor mye av bildet som
-# skal fjernes.
-# Dynamic path construction based on current file location
 current_dir = Path(__file__).parent
 image_name = "tower.jpg"
 row_reduction = 200
