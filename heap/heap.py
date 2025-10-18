@@ -1,3 +1,20 @@
+INF: int = 10**9
+
+
+# ============================================================================
+# Heap Operations - Complexity (Kjøretid)
+# ============================================================================
+# Operation                      Time Complexity
+# ─────────────────────────────────────────────
+# Max-Heapify                     O(lg n)
+# Heap-Max                        Θ(1)
+# Heap-Extract-Max                O(lg n)
+# Heap-Increase-Key               O(lg n)
+# Max-Heap-Insert                 O(lg n)
+# Build-Max-Heap                  Θ(n)
+# ============================================================================
+
+
 def parent(i: int):
     return (i - 1) // 2
 
@@ -24,6 +41,7 @@ class Node:
 class Heap:
     def __init__(self):
         self.items: list[Node] = []
+        self.heap_size: int = 0
 
     def get(self, i: int) -> Node:
         return self.items[i]
@@ -35,7 +53,7 @@ class Heap:
         self.items[i], self.items[j] = self.items[j], self.items[i]
 
     def size(self) -> int:
-        return len(self.items)
+        return self.heap_size if self.heap_size > 0 else len(self.items)
 
     def __repr__(self):
         return f"Heap({self.__str__()})"
@@ -67,6 +85,7 @@ def max_heap_extract_max(A: Heap) -> Node:
     r = max_heap_maximum(A)
     A.set(0, A.get(A.size() - 1))
     A.items.pop()
+    A.heap_size = len(A.items)
     if A.size() > 0:
         max_heapify(A, 0)
     return r
@@ -75,6 +94,7 @@ def max_heap_extract_max(A: Heap) -> Node:
 def build_max_heap(nodes: list[Node]) -> Heap:
     A = Heap()
     A.items = nodes.copy()
+    A.heap_size = len(A.items)
     n = len(A.items)
     for i in range(n // 2 - 1, -1, -1):
         max_heapify(A, i)
@@ -96,6 +116,32 @@ def is_valid_heap(A: Heap) -> bool:
         if A.get(i).key > A.get(parent(i)).key:
             return False
     return True
+
+
+def max_heap_insert(A: Heap, x: Node):
+    k = x.key
+    x.key = -INF
+    A.items.append(x)
+    A.heap_size = len(A.items)
+    max_heap_increase_key(A, x, k)
+
+
+def heap_selection_sort(array: list[int]):
+    nodes = [Node(k) for k in array]
+    A = build_max_heap(nodes)
+    for i in range(A.size() - 1, -1, -1):
+        array[i] = max_heap_extract_max(A).key
+    return array
+
+
+def heapsort(array: list[int]):
+    nodes = [Node(k) for k in array]
+    A = build_max_heap(nodes)
+    for i in range(len(A.items) - 1, 0, -1):
+        A.swap(0, i)
+        A.heap_size = A.heap_size - 1
+        max_heapify(A, 0)
+    return [n.key for n in A.items]
 
 
 # region tests
@@ -174,6 +220,88 @@ def test_increase_key():
     print()
 
 
+def test_insert():
+    """Test insert operation on a max heap."""
+    print("=" * 80)
+    print("TEST: Insert")
+    print("=" * 80)
+
+    # Start with an empty heap
+    heap = Heap()
+    print(f"Starting with empty heap: {heap}\n")
+
+    # Insert values one by one
+    insert_values = [15, 10, 20, 8, 2, 16, 25, 5, 30, 12]
+    print(f"Inserting values in order: {insert_values}\n")
+
+    for insert_num, value in enumerate(insert_values, 1):
+        node = Node(value)
+        max_heap_insert(heap, node)
+        is_valid = is_valid_heap(heap)
+        status = "✅" if is_valid else "❌"
+        print(f"Insert {insert_num:2}: Inserted {value:>2} | {status} Heap: {heap}")
+
+    print()
+
+
+def test_heap_selection_sort():
+    """Test heap_selection_sort algorithm."""
+    print("=" * 80)
+    print("TEST: heap_selection_sort")
+    print("=" * 80)
+
+    # Test cases with different sizes
+    test_cases = [
+        [15, 10, 20, 8, 2, 16, 25, 5, 30, 12],
+        [42, 17, 93, 5, 88, 31, 64, 11],
+        [100],
+        [3, 2, 1],
+    ]
+
+    for case_num, unsorted_array in enumerate(test_cases, 1):
+        original = unsorted_array.copy()
+        print(f"Test case {case_num}:")
+        print(f"  Original:  {original}")
+
+        sorted_array = heap_selection_sort(unsorted_array)
+        is_sorted = sorted_array == sorted(original)
+        status = "✅" if is_sorted else "❌"
+
+        print(f"  Sorted:    {sorted_array}")
+        print(f"  {status} Correctly sorted in ascending order\n")
+
+    print()
+
+
+def test_heapsort():
+    """Test heapsort algorithm."""
+    print("=" * 80)
+    print("TEST: heapsort")
+    print("=" * 80)
+
+    # Test cases with different sizes
+    test_cases = [
+        [15, 10, 20, 8, 2, 16, 25, 5, 30, 12],
+        [42, 17, 93, 5, 88, 31, 64, 11],
+        [100],
+        [3, 2, 1],
+    ]
+
+    for case_num, unsorted_array in enumerate(test_cases, 1):
+        original = unsorted_array.copy()
+        print(f"Test case {case_num}:")
+        print(f"  Original:  {original}")
+
+        sorted_array = heapsort(unsorted_array)
+        is_sorted = sorted_array == sorted(original)
+        status = "✅" if is_sorted else "❌"
+
+        print(f"  Sorted:    {sorted_array}")
+        print(f"  {status} Correctly sorted in ascending order\n")
+
+    print()
+
+
 # endregion
 
 if __name__ == "__main__":
@@ -181,5 +309,8 @@ if __name__ == "__main__":
 
     np.random.seed(42)
 
-    # test_extract_max()
+    test_extract_max()
     test_increase_key()
+    test_insert()
+    test_heap_selection_sort()
+    test_heapsort()
