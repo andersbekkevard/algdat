@@ -209,7 +209,7 @@ def slow_solve(T, s, g, t=0):
 def gen_examples(k, nl, nu):
     for _ in range(k):
         n = random.randint(max(1, nl), nu)
-        ns = random.randint(5, max(5, math.log(n, 20)))
+        ns = random.randint(5, max(5, int(math.log(n, 20))))
         stations = set()
         while len(stations) < ns:
             stations.add(
