@@ -228,3 +228,6 @@ coverage.xml
 # Generated output files
 **/seam_carved_*.jpg
 **/seam_carved_*.png
+
+.claude/
+

@@ -800,7 +800,7 @@ Riktig svar: {answer}
         )
 
 if use_extra_tests:
-    with open("heap/tests_encoding.txt") as extra_tests_data:
+    with open("tests_encoding.txt") as extra_tests_data:
         extra_tests = []
         for line in extra_tests_data:
             extra_tests.append(tuple(map(eval, line.strip().split(" | "))))
