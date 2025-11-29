@@ -9,17 +9,17 @@ def heapsort(A: list[int], n: int):
         return
 
     def max_heapify(A: list[int], size: int, i: int):
-        greatest = i
         l = 2 * i + 1
         r = 2 * i + 2
-        if l < size and A[l] > A[greatest]:
-            greatest = l
-        if r < size and A[r] > A[greatest]:
-            greatest = r
+        m = i
+        if l < size and A[l] > A[m]:
+            m = l
+        if r < size and A[r] > A[m]:
+            m = r
 
-        if greatest != i:
-            A[i], A[greatest] = A[greatest], A[i]
-            max_heapify(A, size, greatest)
+        if m != i:
+            A[i], A[m] = A[m], A[i]
+            max_heapify(A, size, m)
 
     # build heap with max-heapify
     # Bottom layers are already heaps
