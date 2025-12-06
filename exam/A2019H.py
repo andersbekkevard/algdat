@@ -27,38 +27,9 @@ seed = 42
 
 def solve(A, B, X):
     """
-    Avgjør om X er en sammenfletting av sekvensene A og B.
-
-    En sammenfletting betyr at X inneholder alle elementene fra A og B
-    i sin opprinnelige rekkefølge, men flettet sammen.
-
-    Eksempel:
-        A = [1, 2, 3]
-        B = [4, 5]
-        X = [1, 2, 4, 3, 5] er en gyldig sammenfletting
-        X = [1, 4, 2, 3, 5] er også en gyldig sammenfletting
-        X = [1, 3, 2, 4, 5] er IKKE en gyldig sammenfletting (3 kommer før 2)
-
-    Args:
-        A: Liste med elementer [a1, a2, ..., am]
-        B: Liste med elementer [b1, b2, ..., bn]
-        X: Liste med elementer [x1, x2, ..., xm+n] som skal sjekkes
-
-    Returns:
-        True hvis X er en sammenfletting av A og B, False ellers.
-
-    Kompleksitet: O(m * n) hvor m = len(A) og n = len(B)
+    IMPLEMENT ME: Returner True dersom X er en sammenfletting av A og B, ellers False.
     """
-    n, m = len(A), len(B)
-    a, b = 0, 0
-    for i in range(n + m):
-        if b < m and X[i] == B[b]:
-            b += 1
-        elif a < n and X[i] == A[a]:
-            a += 1
-        else:
-            return False
-    return a == n and b == m
+    raise NotImplementedError("Implementer sammenflettings-sjekken her.")
 
 
 def get_feedback(student_answer, expected_answer, A, B, X):
