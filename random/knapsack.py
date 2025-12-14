@@ -25,6 +25,7 @@ def solve(weights: list[int], values: list[int], capacity: int):
         Maximum achievable value. You may also return (value, chosen_items),
         where chosen_items can be a list of indices or a list of booleans.
     """
+    return solve_memo(weights, values, capacity)
     n = len(weights)
     dp = [[0] * (capacity + 1) for _ in range(n)]
     dp[0] = [0 if weights[0] > c else values[0] for c in range(capacity + 1)]
@@ -37,6 +38,29 @@ def solve(weights: list[int], values: list[int], capacity: int):
             dp[i][c] = m
 
     return dp[n - 1][capacity]
+
+
+def solve_memo(weights, values, capacity):
+    """Top-down 0/1 knapsack with memoization (i, remaining_capacity)."""
+    n = len(weights)
+    cap = max(0, capacity)
+    memo: dict[tuple[int, int], int] = {}
+
+    def dfs(i: int, c: int) -> int:
+        if i == n or c == 0:
+            return 0
+        key = (i, c)
+        if key in memo:
+            return memo[key]
+
+        best = dfs(i + 1, c)  # skip item i
+        if weights[i] <= c:
+            best = max(best, values[i] + dfs(i + 1, c - weights[i]))
+
+        memo[key] = best
+        return best
+
+    return dfs(0, cap)
 
 
 # =====================================================================

@@ -1,0 +1,42 @@
+{
+  "repetitive": {
+    "name": "Highly Repetitive",
+    "description": "Text with many repeated characters - best case for compression",
+    "text": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbbbbbbbbbcccccddddeee"
+  },
+  "english_prose": {
+    "name": "English Prose",
+    "description": "Natural English text from literature",
+    "text": "It was the best of times, it was the worst of times, it was the age of wisdom, it was the age of foolishness, it was the epoch of belief, it was the epoch of incredulity, it was the season of Light, it was the season of Darkness, it was the spring of hope, it was the winter of despair."
+  },
+  "dna_sequence": {
+    "name": "DNA Sequence",
+    "description": "Genetic code using only 4 characters (A, C, G, T)",
+    "text": "ATCGATCGATCGTAGCTAGCTAGCTGATCGATCGAATTCCGGAATTCCGGAATTCCGGATCGATCGATCGATCGTAGCTAGCTAGCTGATCGATCGAATTCCGGAATTCCGGAATTCCGGATCGATCGATCGATCGTAGCTAGCTAGCTGATCGATCGAATTCCGG"
+  },
+  "python_code": {
+    "name": "Python Source Code",
+    "description": "Programming code with keywords, indentation, and symbols",
+    "text": "def fibonacci(n):\n    if n <= 1:\n        return n\n    return fibonacci(n-1) + fibonacci(n-2)\n\nfor i in range(10):\n    print(f'fib({i}) = {fibonacci(i)}')"
+  },
+  "random_chars": {
+    "name": "High Entropy Text",
+    "description": "Text with nearly uniform character distribution - worst case",
+    "text": "aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZ0123456789!@#$%^&*()"
+  },
+  "shakespeare": {
+    "name": "Shakespeare",
+    "description": "Classic English from Hamlet's soliloquy",
+    "text": "To be, or not to be, that is the question: Whether 'tis nobler in the mind to suffer The slings and arrows of outrageous fortune, Or to take arms against a sea of troubles And by opposing end them. To die, to sleep, No more; and by a sleep to say we end The heart-ache and the thousand natural shocks That flesh is heir to: 'tis a consummation Devoutly to be wish'd."
+  },
+  "binary_like": {
+    "name": "Binary-like",
+    "description": "Text using only two distinct characters",
+    "text": "010101010101010101010100001111000011110000111100001111010101010101010101010100001111000011110000111100001111"
+  },
+  "norwegian": {
+    "name": "Norwegian Text",
+    "description": "Norwegian language sample with special characters",
+    "text": "Da er det vel kanskje pa tide a snakke om vaeret. I Norge har vi fire arstider, og hver av dem bringer sine egne glaeder og utfordringer. Vinteren er kald og mork, men vi har ski og koselige kvelder inne."
+  }
+}

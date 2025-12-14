@@ -23,37 +23,25 @@ def rodcut(n, prices):
     Returns:
         Maksimal totalpris som kan oppnås
     """
+    # dp = [0] * (n + 1)
+    # for l in range(1, n + 1):
+    #     m = -1e9
+    #     for i in range(min(l, len(prices))):
+    #         m = max(m, dp[l - (i + 1)] + prices[i])
+    #     dp[l] = m
+    # return dp[n]
+    return rodcut_memo(n, prices)
 
-    return rodcut_table(n, prices)
 
-
-def rodcut_naive(n, prices):
-    """
-    Naiv rekursiv løsning for rod cutting-problemet.
-    """
+def rodcut_memo(n, prices, memo={0: 0}):
     if n == 0:
-        return 0
-    return max([rodcut_naive(n - i, prices) + prices[i - 1] for i in range(1, n + 1)])
-
-
-def rodcut_memo(n, prices, memo):
-    if n == 0:
-        return 0
-    elif n in memo.keys():
-        return memo[n]
-    memo[n] = max(
-        [rodcut_memo(n - i, prices, memo) + prices[i - 1] for i in range(1, n + 1)]
-    )
+        memo[n] = 0
+    else:
+        m = -1e9
+        for i in range(min(n, len(prices))):
+            m = max(m, rodcut_memo(n - (i + 1), prices, memo) + prices[i])
+        memo[n] = m
     return memo[n]
-
-
-def rodcut_table(n, prices):
-    # table = [[0 for _ in range(n)] for _ in range(n)]
-    table = [0 for _ in range(n + 1)]
-    for i in range(0, n + 1):
-        for j in range(1, min(len(prices), i) + 1):
-            table[i] = max(table[i], prices[j - 1] + table[i - j])
-    return table[n]
 
 
 # region tests
@@ -406,10 +394,3 @@ def rodcut_memo_cost(n, p, k, memo):
             best = value
     memo[n] = best
     return memo[n]
-
-
-k = 2
-n = 7
-p = [1, 4, 3, 6, 8, 5, 9]
-
-print(rodcut_memo_cost(n, p, k, {}))
